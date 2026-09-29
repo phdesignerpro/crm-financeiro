@@ -142,7 +142,7 @@ export function EntryModal({ opts, onClose }: { opts: OpenOptions; onClose: () =
           <Field label="Valor" error={errors.amount}>
             <MoneyInput value={amountText} onChange={(c) => { setAmountText(c); set("amount", c ?? 0); }} aria-label="Valor" />
           </Field>
-          <Field label="Data" error={errors.date}>
+          <Field label={v.entry === "income" && !v.paid ? "Data prevista" : "Data"} error={errors.date}>
             <TextInput type="date" value={v.date} onChange={(e) => set("date", e.target.value)} />
           </Field>
 
@@ -225,7 +225,7 @@ export function EntryModal({ opts, onClose }: { opts: OpenOptions; onClose: () =
 
         <div className="flex flex-wrap gap-x-6 gap-y-2">
           {(v.entry === "income" || v.entry === "expense") && (
-            <Checkbox checked={v.paid} onChange={(c) => set("paid", c)} label={v.entry === "income" ? "Já recebido" : "Já pago"} />
+            <Checkbox checked={v.paid} onChange={(c) => set("paid", c)} label={v.entry === "income" ? "Já recebi (desmarque para lançar como previsão)" : "Já paguei (desmarque para deixar agendada)"} />
           )}
           {(isCard || v.entry === "income" || v.entry === "expense") && !editing && v.installments <= 1 && (
             <Checkbox checked={v.recurring} onChange={(c) => set("recurring", c)} label="Recorrente" />

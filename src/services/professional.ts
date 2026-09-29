@@ -1,6 +1,7 @@
 import type { AppData, Cents, Client, ISODate, MonthKey, ProfessionalIncome } from "@/types";
-import { diffDays, monthOf } from "@/utils/date";
+import { addMonthsKey, diffDays, monthOf } from "@/utils/date";
 import { sum } from "@/utils/money";
+import { virtualCharges } from "./schedule";
 
 export type ClientStatus = "ativo" | "inadimplente" | "pausado" | "encerrado";
 
@@ -56,3 +57,32 @@ export function professionalSummary(d: AppData, month: MonthKey, today: ISODate)
 }
 
 export const daysLate = (p: ProfessionalIncome, today: ISODate) => Math.max(0, diffDays(today, p.dueDate));
+
+export interface ForecastMonth {
+  month: MonthKey;
+  recurring: Cents;
+  oneOff: Cents;
+  received: Cents;
+  total: Cents;
+  items: { id: string; date: ISODate; label: string; amount: Cents; type: "recorrente" | "avulso"; virtual: boolean; chargeId?: string }[];
+}
+
+/** Previsão de recebimentos dos próximos meses: mensalidades (inclusive as ainda não geradas) + avulsos pendentes. */
+export function receivableForecast(d: AppData, today: ISODate, months = 6): ForecastMonth[] {
+  const start = monthOf(today);
+  const end = addMonthsKey(start, months - 1);
+  const virtual = virtualCharges(d, start, end);
+  const out: ForecastMonth[] = [];
+  for (let m = start; m <= end; m = addMonthsKey(m, 1)) {
+    const real = d.professionalIncome.filter((p) => p.status === "pending" && p.dueDate >= today && monthOf(p.dueDate) === m);
+    const virt = virtual.filter((p) => monthOf(p.dueDate) === m && p.dueDate >= today);
+    const items = [...real.map((p) => ({ p, v: false })), ...virt.map((p) => ({ p, v: true }))]
+      .map(({ p, v }) => ({ id: p.id, date: p.dueDate, label: p.description, amount: p.amount, type: p.type, virtual: v, chargeId: v ? undefined : p.id }))
+      .sort((a, b) => a.date.localeCompare(b.date));
+    const received = sum(d.professionalIncome.filter((p) => p.status === "received" && p.receivedDate && monthOf(p.receivedDate) === m).map((p) => p.amount));
+    const recurring = sum(items.filter((i) => i.type === "recorrente").map((i) => i.amount));
+    const oneOff = sum(items.filter((i) => i.type === "avulso").map((i) => i.amount));
+    out.push({ month: m, recurring, oneOff, received, total: recurring + oneOff, items });
+  }
+  return out;
+}

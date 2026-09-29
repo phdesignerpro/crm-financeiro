@@ -4,6 +4,8 @@ import type {
 import type { Actions } from "@/hooks/useStore";
 import { uid } from "@/utils/id";
 import { monthOf } from "@/utils/date";
+import { addMonths } from "@/utils/date";
+import { splitInstallments } from "@/utils/money";
 import { emptyTx, buildEntry, type EntryValues } from "./transactions";
 import { lastOccurrenceOnOrBefore } from "./schedule";
 import { netWorth } from "./networth";
@@ -191,3 +193,18 @@ export function deleteCategory(a: Actions, d: AppData, id: ID) {
 
 export const accountHasHistory = (d: AppData, id: ID) =>
   d.transactions.some((t) => t.accountId === id || t.toAccountId === id) || d.creditCards.some((c) => c.accountId === id);
+
+/** Serviço avulso (opcionalmente parcelado em N recebimentos mensais). */
+export function createOneOffService(
+  a: Actions, v: { description: string; clientId: ID | null; amount: Cents; dueDate: ISODate; installments: number },
+) {
+  const parts = splitInstallments(v.amount, Math.max(1, v.installments));
+  const rows: ProfessionalIncome[] = parts.map((amount, i) => {
+    const dueDate = addMonths(v.dueDate, i);
+    return {
+      id: uid(), clientId: v.clientId, description: parts.length > 1 ? `${v.description} (${i + 1}/${parts.length})` : v.description,
+      amount, dueDate, receivedDate: null, status: "pending", type: "avulso", competence: monthOf(dueDate), accountId: null,
+    };
+  });
+  a.add("professionalIncome", rows);
+}
