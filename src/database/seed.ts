@@ -313,8 +313,8 @@ export function buildDemoData(today: ISODate): AppData {
   /* Orçamento mensal */
   const bud = (name: string, amount: number) => ({ id: uid(), categoryId: cat(name), amount: R(amount) });
   d.budgets = [
-    bud("Mercado", 1300), bud("Alimentação", 1500), bud("Delivery", 350), bud("Restaurantes", 500), bud("Lazer", 800),
-    bud("Compras", 600), bud("Viagens", 1000), bud("Transporte", 700), bud("Combustível", 450), bud("Pets", 300),
+    bud("Mercado", 1300), bud("Alimentação", 1500), bud("Delivery", 350), bud("Restaurantes", 600), bud("Lazer", 800),
+    bud("Compras", 600), bud("Viagens", 1000), bud("Transporte", 1900), bud("Combustível", 550), bud("Pets", 400),
   ];
 
   /* Patrimônio */

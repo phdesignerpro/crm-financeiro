@@ -24,7 +24,7 @@ export function StatCard({ label, value, tone = "neutral", icon, delta, invertDe
         <p className="text-xs font-medium text-muted">{label}</p>
         {icon && <span className={cn("flex h-7 w-7 items-center justify-center rounded-lg", toneSoft(tone))}>{icon}</span>}
       </div>
-      <p className={cn("num mt-2 truncate text-xl font-semibold tracking-tight sm:text-[22px]", tone !== "neutral" && toneText(tone))}>{value}</p>
+      <p className={cn("num mt-2 text-[17px] font-semibold tracking-tight sm:text-[22px]", tone !== "neutral" && toneText(tone))}>{value}</p>
       {delta != null && (
         <p className="mt-1 text-xs">
           <span className={cn("font-medium", good ? "text-income" : "text-expense")}>
