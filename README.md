@@ -18,7 +18,7 @@ para recarregar a demo ou apagar tudo.
 
 **Modo Supabase (produção):**
 
-1. Crie um projeto no Supabase e rode `supabase/migrations/0001_init.sql` (SQL Editor ou `supabase db push`).
+1. Crie um projeto no Supabase e rode, nesta ordem, `supabase/migrations/0001_parte1_base.sql`, `0002_parte2_lancamentos.sql` e `0003_parte3_seguranca_rls.sql` (SQL Editor ou `supabase db push`).
 2. Copie `.env.example` para `.env.local` e preencha `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 3. Com isso: login/cadastro reais, `src/proxy.ts` protege todas as rotas e os dados passam a ser lidos/gravados no Postgres.
 
@@ -45,7 +45,7 @@ src/
   database/       repository (interface), local-repository, supabase-repository, seed (demo), defaults
   types/          modelo de domínio
   utils/          money (centavos), date, labels, csv
-supabase/migrations/0001_init.sql   schema + RLS
+supabase/migrations/000{1,2,3}_*.sql   schema (3 partes) + RLS
 ```
 
 **Camadas:** `pages → hooks/store → services (puros) → database (repositório)`. O store persiste por operações
